@@ -12,7 +12,7 @@ namespace DealOrNoDeal.Model
     public class Banker
     {
 
-        private int currentOffer;
+        private readonly IList<int> offers;
 
         #region Properties
 
@@ -22,15 +22,7 @@ namespace DealOrNoDeal.Model
         /// <value>
         ///     The current bank offer.
         /// </value>
-        public int CurrentOffer
-        {
-            get => this.currentOffer;
-            private set
-            {
-                this.currentOffer = value;
-                this.updateOfferStatistics(value);
-            }
-        }
+        public int CurrentOffer => this.offers.Last();
 
         /// <summary>
         ///     Gets the minimum bank offer.
@@ -38,7 +30,7 @@ namespace DealOrNoDeal.Model
         /// <value>
         ///     The minimum bank offer.
         /// </value>
-        public int MinOffer { get; private set; }
+        public int MinOffer => this.offers.Min();
 
         /// <summary>
         ///     Gets the maximum bank offer.
@@ -46,7 +38,15 @@ namespace DealOrNoDeal.Model
         /// <value>
         ///     The maximum bank offer.
         /// </value>
-        public int MaxOffer { get; private set; }
+        public int MaxOffer => this.offers.Max();
+
+        /// <summary>
+        ///     Gets the average offer.
+        /// </summary>
+        /// <value>
+        ///     The average offer.
+        /// </value>
+        public int AvgOffer => (int) Math.Round(this.offers.Average() / RoundingFactor, 0, MidpointRounding.AwayFromZero) * RoundingFactor;
 
         #endregion
 
@@ -57,9 +57,7 @@ namespace DealOrNoDeal.Model
         /// </summary>
         public Banker()
         {
-            this.CurrentOffer = InitialCurrentOffer;
-            this.MinOffer = InitialMinOffer;
-            this.MaxOffer = InitialMaxOffer;
+            this.offers = new List<int>();
         }
 
         #endregion
@@ -70,11 +68,10 @@ namespace DealOrNoDeal.Model
         ///     Calculates the current offer. The offer given depends on the current state of the game and is
         ///     determined by the following formula:
         ///     offer = amountOfMoneyInAllRemainingBriefCases / casesToOpenNextRound / totalNumberOfCasesRemaining
-        ///     The offer is then rounded to the nearest dollar.
+        ///     The offer is then rounded to the nearest hundred.
         ///     Precondition: dollarAmountsInPlay does not equal null AND dollarAmountsInPlay.Count does not equal 0 AND
         ///     casesToOpenNextRound does not equal 0.
-        ///     Post-condition: CurrentOffer = the banker's new offer. If CurrentOffer greater than MaxOffer, then MaxOffer = CurrentOffer.
-        ///     If CurrentOffer less than MinOffer, then MinOffer = CurrentOffer
+        ///     Post-condition: CurrentOffer = the banker's new offer. 
         /// </summary>
         /// <param name="dollarAmountsInPlay">A list of all the remaining dollar amounts still contained in briefcases in play.</param>
         /// <param name="casesToOpenNextRound">The number of cases to open next round.</param>
@@ -102,9 +99,18 @@ namespace DealOrNoDeal.Model
             var unRoundedOffer = totalDollarAmountRemaining / (decimal) casesToOpenNextRound / numberOfCasesRemaining;
 
             var roundedOffer = (int) Math.Round(unRoundedOffer / RoundingFactor, 0, MidpointRounding.AwayFromZero) * RoundingFactor;
-            this.CurrentOffer = roundedOffer;
 
-            return this.CurrentOffer;
+            return roundedOffer;
+        }
+
+
+        /// <summary>
+        ///     Adds the formal offer to the list of offers.
+        /// </summary>
+        /// <param name="offer">The offer.</param>
+        public void AddFormalOffer(int offer)
+        {
+            this.offers.Add(offer);
         }
 
         private int sumDollarAmounts(IEnumerable<int> dollarAmounts)
@@ -112,26 +118,10 @@ namespace DealOrNoDeal.Model
             return dollarAmounts.Sum();
         }
 
-        private void updateOfferStatistics(int newOffer)
-        {
-            if (newOffer < this.MinOffer)
-            {
-                this.MinOffer = newOffer;
-            }
-
-            if (newOffer > this.MaxOffer)
-            {
-                this.MaxOffer = newOffer;
-            }
-        }
-
         #endregion
 
         #region Constants
 
-        private const int InitialMinOffer = int.MaxValue;
-        private const int InitialMaxOffer = int.MinValue;
-        private const int InitialCurrentOffer = 0;
         private const int RoundingFactor = 100;
 
         #endregion

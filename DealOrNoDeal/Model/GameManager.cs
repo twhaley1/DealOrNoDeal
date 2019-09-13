@@ -112,7 +112,15 @@ namespace DealOrNoDeal.Model
         /// <value>
         ///     The current offer.
         /// </value>
-        public int GetCurrentOffer => this.calculateOffer();
+        public int GetCurrentOffer => this.banker.CurrentOffer;
+
+        /// <summary>
+        ///     Gets the average offer.
+        /// </summary>
+        /// <value>
+        ///     The average offer.
+        /// </value>
+        public int GetAvgOffer => this.banker.AvgOffer;
 
         /// <summary>
         ///     Gets the starting briefcase's identifier.
@@ -202,6 +210,10 @@ namespace DealOrNoDeal.Model
                 this.IsGameStarted = true;
             }
 
+            if (this.roundManager.NoRemainingCasesLeft)
+            {
+                this.banker.AddFormalOffer(this.calculateOffer());
+            }
             return this.caseManager.RemoveBriefcaseFromPlay(briefcase);
         }
 

@@ -275,8 +275,8 @@ namespace DealOrNoDeal.View
 
         private string buildMinMaxOfferString()
         {
-            return "Offers: Min: " + this.gameManager.GetMinOffer.ToString("C") + "; " +
-                   "Max: " + this.gameManager.GetMaxOffer.ToString("C");
+            return "Offers: Max: " + this.gameManager.GetMaxOffer.ToString("C") + "; Min: " + this.gameManager.GetMinOffer.ToString("C") + "\n" +
+                "Average: " + this.gameManager.GetAvgOffer.ToString("C");
         }
 
         private void dealButton_Click(object sender, RoutedEventArgs e)
