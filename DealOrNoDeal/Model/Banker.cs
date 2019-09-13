@@ -101,7 +101,7 @@ namespace DealOrNoDeal.Model
             var totalDollarAmountRemaining = this.sumDollarAmounts(dollarAmountsInPlay);
             var unRoundedOffer = totalDollarAmountRemaining / (decimal) casesToOpenNextRound / numberOfCasesRemaining;
 
-            var roundedOffer = (int) Math.Round(unRoundedOffer, MidpointRounding.AwayFromZero);
+            var roundedOffer = (int) Math.Round(unRoundedOffer / RoundingFactor, 0, MidpointRounding.AwayFromZero) * RoundingFactor;
             this.CurrentOffer = roundedOffer;
 
             return this.CurrentOffer;
@@ -132,6 +132,7 @@ namespace DealOrNoDeal.Model
         private const int InitialMinOffer = int.MaxValue;
         private const int InitialMaxOffer = int.MinValue;
         private const int InitialCurrentOffer = 0;
+        private const int RoundingFactor = 100;
 
         #endregion
     }
