@@ -40,7 +40,7 @@ namespace DealOrNoDeal.View
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DealOrNoDealPage"/> class.
+        ///     Initializes a new instance of the <see cref="DealOrNoDealPage" /> class.
         /// </summary>
         public DealOrNoDealPage()
         {
@@ -152,7 +152,7 @@ namespace DealOrNoDeal.View
 
             var clickedBriefcaseId = this.getBriefcaseID(clickedBriefcaseButton);
 
-            var dollarAmountInClickedBriefcase = this.gameManager.CaseManager.GetDollarAmountIn(clickedBriefcaseId);
+            var dollarAmountInClickedBriefcase = this.gameManager.GetIdsDollarAmount(clickedBriefcaseId);
             if (this.gameManager.IsGameStarted)
             {
                 this.findAndGrayOutGameDollarLabel(dollarAmountInClickedBriefcase);
@@ -165,7 +165,7 @@ namespace DealOrNoDeal.View
 
         private int getBriefcaseID(Button selectedBriefCase)
         {
-            return (int)selectedBriefCase.Tag;
+            return (int) selectedBriefCase.Tag;
         }
 
         private void modifyUiComponentsBriefcaseClick(Button clickedBriefcaseButton)
@@ -173,14 +173,13 @@ namespace DealOrNoDeal.View
             this.removeBriefcaseButton(clickedBriefcaseButton);
 
             this.updateLabelInformation();
-            if (this.gameManager.NoRemainingCasesLeft)
+            if (this.gameManager.GetNoRemainingCasesLeft)
             {
                 this.disableAllBriefcaseButtons();
                 this.enableDealButtons();
                 this.updateSummaryOutput();
             }
         }
-
 
         private void removeBriefcaseButton(Button clickedButton)
         {
@@ -225,50 +224,59 @@ namespace DealOrNoDeal.View
 
         private void updateRoundLabel()
         {
-            if (this.gameManager.RoundManager.IsFinalRound)
+            if (this.gameManager.GetIsFinalRound)
             {
                 this.roundLabel.Text = "This is the final round";
             }
             else
             {
-                this.roundLabel.Text = "Round " + this.gameManager.RoundManager.CurrentRound + ": " +
-                    EnglishStringUtility.AppendSDependingOnNumber(this.gameManager.RoundManager.GetNumberOfCasesToOpenThisRound(), " cases") +
-                    " to open.";
+                this.roundLabel.Text = "Round " + this.gameManager.GetCurrentRound + ": " +
+                                       EnglishStringUtility.AppendSDependingOnNumber(
+                                           this.gameManager.GetNumberCasesToOpenInCurrentRound, " cases") +
+                                       " to open.";
             }
         }
 
         private void updateCasesToOpenLabel()
         {
-            if (this.gameManager.RoundManager.IsFinalRound)
+            if (this.gameManager.GetIsFinalRound)
             {
                 this.casesToOpenLabel.Text = "Select a case below.";
             }
             else
             {
                 this.casesToOpenLabel.Text =
-                    EnglishStringUtility.AppendSDependingOnNumber(this.gameManager.CasesLeftInCurrentRound, " more cases") +
+                    EnglishStringUtility.AppendSDependingOnNumber(this.gameManager.GetNumberCasesLeftInCurrentRound,
+                        " more cases") +
                     " to open.";
             }
         }
 
         private void updateSummaryOutput()
         {
-            if (this.gameManager.NoRemainingCasesLeft)
+            if (this.gameManager.GetNoRemainingCasesLeft)
             {
-                this.summaryOutput.Text = "Offers: Min: " + this.gameManager.Banker.MinOffer.ToString("C") +
-                                          "; Max: " + this.gameManager.Banker.MaxOffer.ToString("C") + "\n" +
-                                          "Current offer: " + this.gameManager.Banker.CurrentOffer.ToString("C") + "\n" +
+                this.summaryOutput.Text = this.buildMinMaxOfferString() + "\n" +
+                                          "Current offer: " + this.gameManager.GetCurrentOffer.ToString("C") + "\n" +
                                           "Deal or No Deal?";
             }
-            else if (this.gameManager.RoundManager.IsFirstRound)
+            else if (this.gameManager.GetIsFirstRound)
             {
-                this.summaryOutput.Text = "Your case: " + (this.gameManager.CaseManager.StartingCaseId + 1);
+                this.summaryOutput.Text = "Your case: " + (this.gameManager.GetStartingBriefcaseId + 1);
             }
-            else if (this.gameManager.RoundManager.IsFinalRound)
+            else if (this.gameManager.GetIsFinalRound)
             {
-                this.summaryOutput.Text = "Offers: Min: " + this.gameManager.Banker.MinOffer.ToString("C") + "; " +
-                                          "Max: " + this.gameManager.Banker.MaxOffer.ToString("C");
+                if (!this.gameManager.IsGameOver)
+                {
+                    this.summaryOutput.Text = this.buildMinMaxOfferString();
+                }
             }
+        }
+
+        private string buildMinMaxOfferString()
+        {
+            return "Offers: Min: " + this.gameManager.GetMinOffer.ToString("C") + "; " +
+                   "Max: " + this.gameManager.GetMaxOffer.ToString("C");
         }
 
         private void dealButton_Click(object sender, RoutedEventArgs e)
@@ -281,16 +289,17 @@ namespace DealOrNoDeal.View
 
         private void updateDealSummaryOutput()
         {
-            if (this.gameManager.RoundManager.IsFinalRound)
+            if (this.gameManager.GetIsFinalRound)
             {
                 this.summaryOutput.Text =
-                    "Congrats you win " + this.gameManager.CaseManager.StartingCase.DollarAmount.ToString("C") + "\n" +
+                    "Congrats you win " + this.gameManager.GetStartingBriefcaseDollarAmount.ToString("C") + "\n" +
                     "GAME OVER";
             }
             else
             {
-                this.summaryOutput.Text = "Your case contained: " + this.gameManager.CaseManager.StartingCase.DollarAmount.ToString("C") + "\n" +
-                                          "Accepted offer: " + this.gameManager.Banker.CurrentOffer.ToString("C") + "\n" +
+                this.summaryOutput.Text = "Your case contained: " +
+                                          this.gameManager.GetStartingBriefcaseDollarAmount.ToString("C") + "\n" +
+                                          "Accepted offer: " + this.gameManager.GetCurrentOffer.ToString("C") + "\n" +
                                           "GAME OVER";
             }
         }
@@ -299,19 +308,19 @@ namespace DealOrNoDeal.View
         {
             this.modifyUiComponentsNoDealClick();
             this.updateGameStatePostDeal();
-            this.modifyLabelNoDealClick();
+            this.updateLabelInformation();
         }
 
         private void modifyUiComponentsNoDealClick()
         {
             this.updateNoDealSummaryOutput();
 
-            if (this.gameManager.RoundManager.IsSemiFinalRound)
+            if (this.gameManager.GetIsSemiFinalRound)
             {
                 this.collapseAllBriefcaseButtons();
                 this.changeDealButtonsToFinalBriefcaseButtons();
             }
-            else if (this.gameManager.RoundManager.IsFinalRound)
+            else if (this.gameManager.GetIsFinalRound)
             {
                 this.disableDealButtons();
             }
@@ -322,36 +331,37 @@ namespace DealOrNoDeal.View
             }
         }
 
-        private void modifyLabelNoDealClick()
-        {
-            this.updateLabelInformation();
-        }
-
         private void updateGameStatePostDeal()
         {
-            this.gameManager.NextRound();
+            if (this.gameManager.GetIsFinalRound)
+            {
+                this.gameManager.EndGame();
+            }
+            else
+            {
+                this.gameManager.NextRound();
+            }
         }
 
         private void updateNoDealSummaryOutput()
         {
-            if (this.gameManager.RoundManager.IsFinalRound)
+            if (this.gameManager.GetIsFinalRound)
             {
-                this.summaryOutput.Text = "Congrats you win " + this.gameManager.CaseManager.GetLastBriefcase().DollarAmount.ToString("C") + "\n" +
+                this.summaryOutput.Text = "Congrats you win " +
+                                          this.gameManager.GetLastBriefcasesDollarAmount().ToString("C") + "\n" +
                                           "GAME OVER";
             }
             else
             {
-                this.summaryOutput.Text = "Offers: Min: " + this.gameManager.Banker.MinOffer.ToString("C") +
-                                          "; Max: " + this.gameManager.Banker.MaxOffer.ToString("C") +
-                                          "\n" +
-                                          "Last offer: " + this.gameManager.Banker.CurrentOffer.ToString("C");
+                this.summaryOutput.Text = this.buildMinMaxOfferString() + "\n" +
+                                          "Last offer: " + this.gameManager.GetCurrentOffer.ToString("C");
             }
         }
 
         private void changeDealButtonsToFinalBriefcaseButtons()
         {
-            this.dealButton.Content = "Case " + (this.gameManager.CaseManager.StartingCaseId + 1);
-            this.noDealButton.Content = "Case " + (this.gameManager.CaseManager.GetLastBriefcase().Id + 1);
+            this.dealButton.Content = "Case " + (this.gameManager.GetStartingBriefcaseId + 1);
+            this.noDealButton.Content = "Case " + (this.gameManager.GetLastBriefcasesId() + 1);
         }
 
         private void enableDealButtons()

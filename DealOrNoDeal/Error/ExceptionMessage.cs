@@ -48,9 +48,5 @@
         /// </summary>
         public const string NullStringsNotAllowed = "A null string is not accepted.";
 
-        /// <summary>
-        ///     Message for when a method has a null manager passed in to it.
-        /// </summary>
-        public const string NullManagerNotAllowed = "Manager can not be null.";
     }
 }

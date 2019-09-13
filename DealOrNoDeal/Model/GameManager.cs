@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Data;
+﻿using System.Data;
 using DealOrNoDeal.Error;
 
 namespace DealOrNoDeal.Model
@@ -13,33 +10,13 @@ namespace DealOrNoDeal.Model
     {
         #region Data members
 
+        private readonly Banker banker;
+        private readonly RoundManager roundManager;
+        private readonly CaseManager caseManager;
+
         #endregion
 
         #region Properties
-
-        /// <summary>
-        ///     Gets the bank manager.
-        /// </summary>
-        /// <value>
-        ///     Banker object.
-        /// </value>
-        public Banker Banker { get; }
-
-        /// <summary>
-        ///     Gets the round manager.
-        /// </summary>
-        /// <value>
-        ///     RoundManager object.
-        /// </value>
-        public RoundManager RoundManager { get; }
-
-        /// <summary>
-        ///     Gets the case manager.
-        /// </summary>
-        /// <value>
-        ///     CaseManager object.
-        /// </value>
-        public CaseManager CaseManager { get; }
 
         /// <summary>
         ///     Gets a value indicating whether the game is started - Player has selected a case.
@@ -50,12 +27,12 @@ namespace DealOrNoDeal.Model
         public bool IsGameStarted { get; private set; }
 
         /// <summary>
-        ///     Gets the number of cases left to open in the current round.
+        ///     Gets a value indicating whether this game is over.
         /// </summary>
         /// <value>
-        ///     The cases left to open in the current round.
+        ///   <c>true</c> if the game is over; otherwise, <c>false</c>.
         /// </value>
-        public int CasesLeftInCurrentRound { get; set; }
+        public bool IsGameOver { get; private set; }
 
         /// <summary>
         ///     Gets a value indicating whether the current instance of the game is at the end of a round.
@@ -63,7 +40,95 @@ namespace DealOrNoDeal.Model
         /// <value>
         ///     <c>true</c> if this instance is at the end of a round; otherwise, <c>false</c>.
         /// </value>
-        public bool NoRemainingCasesLeft => this.CasesLeftInCurrentRound == 0;
+        public bool GetNoRemainingCasesLeft => this.roundManager.NoRemainingCasesLeft;
+
+        /// <summary>
+        ///     Gets a value indicating whether the current round is the final round.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if it is the final round; otherwise, <c>false</c>.
+        /// </value>
+        public bool GetIsFinalRound => this.roundManager.IsFinalRound;
+
+        /// <summary>
+        ///     Gets a value indicating whether the current round is the semi final round.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if it is the semi final round; otherwise, <c>false</c>.
+        /// </value>
+        public bool GetIsSemiFinalRound => this.roundManager.IsSemiFinalRound;
+
+        /// <summary>
+        ///     Gets a value indicating whether the current round is the first round.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if it is the first round; otherwise, <c>false</c>.
+        /// </value>
+        public bool GetIsFirstRound => this.roundManager.IsFirstRound;
+
+        /// <summary>
+        ///     Gets the get current round number.
+        /// </summary>
+        /// <value>
+        ///     The current round.
+        /// </value>
+        public int GetCurrentRound => this.roundManager.CurrentRound;
+
+        /// <summary>
+        ///     Gets the get number of cases to open in current round.
+        /// </summary>
+        /// <value>
+        ///     The get number cases to open in current round.
+        /// </value>
+        public int GetNumberCasesToOpenInCurrentRound => this.roundManager.GetNumberOfCasesToOpenThisRound();
+
+        /// <summary>
+        ///     Gets the number of cases left in current round.
+        /// </summary>
+        /// <value>
+        ///     The number of cases left in current round.
+        /// </value>
+        public int GetNumberCasesLeftInCurrentRound => this.roundManager.CasesLeftInCurrentRound;
+
+        /// <summary>
+        ///     Gets the minimum offer.
+        /// </summary>
+        /// <value>
+        ///     The minimum offer.
+        /// </value>
+        public int GetMinOffer => this.banker.MinOffer;
+
+        /// <summary>
+        ///     Gets the maximum offer.
+        /// </summary>
+        /// <value>
+        ///     The maximum offer.
+        /// </value>
+        public int GetMaxOffer => this.banker.MaxOffer;
+
+        /// <summary>
+        ///     Gets the current offer.
+        /// </summary>
+        /// <value>
+        ///     The current offer.
+        /// </value>
+        public int GetCurrentOffer => this.calculateOffer();
+
+        /// <summary>
+        ///     Gets the starting briefcase's identifier.
+        /// </summary>
+        /// <value>
+        ///     The starting briefcase's identifier.
+        /// </value>
+        public int GetStartingBriefcaseId => this.caseManager.StartingCaseId;
+
+        /// <summary>
+        ///     Gets the starting briefcase's dollar amount.
+        /// </summary>
+        /// <value>
+        ///     The starting briefcase's dollar amount.
+        /// </value>
+        public int GetStartingBriefcaseDollarAmount => this.caseManager.StartingCase.DollarAmount;
 
         #endregion
 
@@ -75,13 +140,13 @@ namespace DealOrNoDeal.Model
         public GameManager()
         {
             this.IsGameStarted = InitialGameStarted;
-            this.CasesLeftInCurrentRound = InitialCasesLeft;
+            this.IsGameOver = InitialGameOver;
 
-            this.Banker = new Banker(this);
-            this.RoundManager = new RoundManager();
-            this.CaseManager = new CaseManager();
+            this.banker = new Banker();
+            this.roundManager = new RoundManager();
+            this.caseManager = new CaseManager();
 
-            this.CaseManager.PopulateBriefCases(getNewListOfPossibleDollarAmounts());
+            this.caseManager.PopulateBriefCases();
         }
 
         #endregion
@@ -117,50 +182,86 @@ namespace DealOrNoDeal.Model
         ///     Precondition: The id must be related to a briefcase that is currently in play.
         /// </summary>
         /// <param name="id">A briefcase identifier.</param>
-        /// <returns>The dollar amount of the removed briefcase.</returns>
+        /// <returns>The dollar amount in the removed briefcase.</returns>
         /// <exception cref="ConstraintException">Occurs when the specified id corresponds with a briefcase that is no longer in play.</exception>
         public int ProcessBriefCaseRemoval(int id)
         {
-            if (!this.CaseManager.IsIdStillInPlay(id))
+            if (!this.caseManager.IsIdStillInPlay(id))
             {
                 throw new ConstraintException(ExceptionMessage.IdNotInPlay);
             }
 
-            var briefcase = this.CaseManager.GetCaseWithId(id);
+            var briefcase = this.caseManager.GetCaseWithId(id);
             if (this.IsGameStarted)
             {
                 this.decrementCasesLeftInCurrentRound();
             }
             else
             {
-                this.CaseManager.AllocateStartingBriefcase(briefcase);
+                this.caseManager.AllocateStartingBriefcase(briefcase);
                 this.IsGameStarted = true;
             }
 
-            return this.CaseManager.RemoveBriefcaseFromPlay(briefcase);
+            return this.caseManager.RemoveBriefcaseFromPlay(briefcase);
         }
 
         /// <summary>
         ///     Moves the game to the next round.
-        ///     Post-condition: RoundIndex = RoundIndex@prev + 1 
         /// </summary>
         public void NextRound()
         {
-            this.RoundManager.MoveToNextRound();
-            this.CasesLeftInCurrentRound = this.RoundManager.GetNumberOfCasesToOpenThisRound();
+            this.roundManager.MoveToNextRound();
+        }
+
+        /// <summary>
+        ///     Gets the dollar amount in the briefcase with the specified id.
+        /// </summary>
+        /// <param name="briefcaseId">The briefcase identifier.</param>
+        /// <returns>The dollar amount in the briefcase with the specified id.</returns>
+        public int GetIdsDollarAmount(int briefcaseId)
+        {
+            return this.caseManager.GetDollarAmountIn(briefcaseId);
+        }
+
+        /// <summary>
+        ///     Gets the last briefcases dollar amount.
+        ///     Precondition: There must only be one briefcase left in play, apart from the starting briefcase.
+        /// </summary>
+        /// <returns>The dollar amount contained in the last briefcase, not the player's starting briefcase.</returns>
+        public int GetLastBriefcasesDollarAmount()
+        {
+            return this.caseManager.GetLastBriefcase().DollarAmount;
+        }
+
+        /// <summary>
+        ///     Gets the last briefcases identifier.
+        ///     Precondition: There must only be one briefcase left in play, apart from the starting briefcase.
+        /// </summary>
+        /// <returns>The id of the last briefcase, not the player's starting briefcase.</returns>
+        public int GetLastBriefcasesId()
+        {
+            return this.caseManager.GetLastBriefcase().Id;
+        }
+
+
+        /// <summary>
+        ///     Ends the game.
+        ///     Post-condition: IsGameOver = true
+        /// </summary>
+        public void EndGame()
+        {
+            this.IsGameOver = true;
         }
 
         private void decrementCasesLeftInCurrentRound()
         {
-            this.CasesLeftInCurrentRound--;
+            this.roundManager.CasesLeftInCurrentRound--;
         }
 
-        private static IEnumerable<int> getNewListOfPossibleDollarAmounts()
+        private int calculateOffer()
         {
-            return new List<int> {
-                0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750, 1000, 5000, 10000, 25000, 50000, 75000, 100000,
-                200000, 300000, 400000, 500000, 750000, 1000000
-            };
+            return this.banker.CalculateOffer(this.caseManager.GetDollarAmountsInPlay(),
+                this.roundManager.GetNumberOfCasesToOpenNextRound());
         }
 
         #endregion
@@ -169,7 +270,7 @@ namespace DealOrNoDeal.Model
 
         private const int MaximumBriefcaseId = CaseManager.TotalNumberOfCases - 1;
         private const bool InitialGameStarted = false;
-        private const int InitialCasesLeft = 6;
+        private const bool InitialGameOver = false;
 
         #endregion
     }

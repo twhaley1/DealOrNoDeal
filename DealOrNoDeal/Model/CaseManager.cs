@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using DealOrNoDeal.Error;
 
 namespace DealOrNoDeal.Model
@@ -11,21 +12,9 @@ namespace DealOrNoDeal.Model
     /// </summary>
     public class CaseManager
     {
-        #region Types and Delegates
-
-        public delegate void Action(Briefcase briefcase);
-
-        #endregion
 
         #region Data members
 
-        /// <summary>
-        ///     The total number of cases at the start of the game.
-        /// </summary>
-        public const int TotalNumberOfCases = 26;
-
-        private const int InitialStartingBriefcaseId = -1;
-        private const Briefcase InitialBriefcase = null;
         private readonly IList<Briefcase> briefcases;
 
         #endregion
@@ -84,29 +73,39 @@ namespace DealOrNoDeal.Model
             return this.briefcases[0];
         }
 
+        /// <summary>
+        ///     Gets the case with chosen identifier.
+        ///     Precondition: The chosen id must belong to a briefcase that is still in play.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>The briefcase with the chosen identifier or null if a briefcase was not found.</returns>
+        /// <exception cref="ConstraintException">Occurs when the id chosen belongs to a briefcase that is not in play.</exception>
         public Briefcase GetCaseWithId(int id)
-        {
-            foreach (var briefcase in this.briefcases)
-            {
-                if (briefcase.Id == id)
-                {
-                    return briefcase;
-                }
-            }
-
-            return null;
-        }
-
-        public int GetDollarAmountIn(int id)
         {
             if (!this.IsIdStillInPlay(id))
             {
                 throw new ConstraintException(ExceptionMessage.IdNotInPlay);
             }
 
+            return this.briefcases.Single(briefcase => briefcase.Id == id);
+        }
+
+
+        /// <summary>
+        ///     Gets the dollar amount in the briefcase with the chosen id.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>The dollar amount in the briefcase with the specified id.</returns>
+        public int GetDollarAmountIn(int id)
+        {
             return this.GetCaseWithId(id).DollarAmount;
         }
 
+        /// <summary>
+        ///     Removes the specified briefcase from play.
+        /// </summary>
+        /// <param name="briefcase">The briefcase.</param>
+        /// <returns>The dollar amount in the removed briefcase.</returns>
         public int RemoveBriefcaseFromPlay(Briefcase briefcase)
         {
             var targetBriefcaseAmount = briefcase.DollarAmount;
@@ -115,49 +114,50 @@ namespace DealOrNoDeal.Model
             return targetBriefcaseAmount;
         }
 
+        /// <summary>
+        ///     Determines whether a briefcase with the specified id is still in play.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>
+        ///   <c>true</c> if a briefcase with the specified id is in play; otherwise, <c>false</c>.
+        /// </returns>
         public bool IsIdStillInPlay(int id)
         {
-            foreach (var briefcase in this.briefcases)
-            {
-                if (briefcase.Id == id)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return this.briefcases.Any(briefcase => briefcase.Id == id);
         }
 
+        /// <summary>
+        ///     Allocates the starting briefcase and its id.
+        ///     Post-condition: StartingCase = targetBriefcase and StartingCaseId = targetBriefcase.Id
+        /// </summary>
+        /// <param name="targetBriefcase">The target briefcase.</param>
         public void AllocateStartingBriefcase(Briefcase targetBriefcase)
         {
             this.StartingCase = targetBriefcase;
             this.StartingCaseId = targetBriefcase.Id;
         }
 
-        public void PopulateBriefCases(IEnumerable<int> dollarAmountsToDistribute)
+        /// <summary>
+        ///     Populates the game's briefcases with briefcase objects with unique identifiers and dollar amounts.
+        /// </summary>
+        public void PopulateBriefCases()
         {
-            var possibleDollarAmounts = new List<int>(dollarAmountsToDistribute);
+            var possibleDollarAmounts = new List<int>(getNewListOfPossibleDollarAmounts());
             for (var i = 0; i < TotalNumberOfCases; i++)
             {
                 this.briefcases.Add(new Briefcase(i, this.getUniqueRandomDollarAmountFrom(possibleDollarAmounts)));
             }
         }
 
-        public void ForEachCopyOfACase(Action performAction)
+        /// <summary>
+        ///     Gets a list of dollar amounts in play.
+        /// </summary>
+        /// <returns>a list of dollar amounts left in play.</returns>
+        public IList<int> GetDollarAmountsInPlay()
         {
-            IEnumerable<Briefcase> copyCases = new List<Briefcase>(this.briefcases);
-            foreach (var briefcase in copyCases)
-            {
-                performAction(briefcase);
-            }
-        }
-
-        public IList<int> GetListOfDollarAmountsLeftInPlay()
-        {
-            var dollarAmountsLeftInPlay = new List<int> { this.StartingCase.DollarAmount };
-            this.ForEachCopyOfACase(briefcase => dollarAmountsLeftInPlay.Add(briefcase.DollarAmount));
-
-            return dollarAmountsLeftInPlay;
+            var dollarAmounts = this.briefcases.Select(briefcase => briefcase.DollarAmount).ToList();
+            dollarAmounts.Add(this.StartingCase.DollarAmount);
+            return dollarAmounts;
         }
 
         private int getUniqueRandomDollarAmountFrom(IList<int> dollarAmounts)
@@ -168,6 +168,27 @@ namespace DealOrNoDeal.Model
 
             return chosenDollarAmount;
         }
+
+        private static IEnumerable<int> getNewListOfPossibleDollarAmounts()
+        {
+            return new List<int> {
+                0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750, 1000, 5000, 10000, 25000, 50000, 75000, 100000,
+                200000, 300000, 400000, 500000, 750000, 1000000
+            };
+        }
+
+        #endregion
+
+        #region Constants
+
+
+        /// <summary>
+        ///     The total number of cases at the start of the game.
+        /// </summary>
+        public const int TotalNumberOfCases = 26;
+
+        private const int InitialStartingBriefcaseId = -1;
+        private const Briefcase InitialBriefcase = null;
 
         #endregion
     }

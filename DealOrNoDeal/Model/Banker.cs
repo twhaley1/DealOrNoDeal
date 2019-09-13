@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DealOrNoDeal.Error;
 
 namespace DealOrNoDeal.Model
@@ -10,11 +11,8 @@ namespace DealOrNoDeal.Model
     /// </summary>
     public class Banker
     {
-        #region Data members
 
-        private readonly GameManager gameManager;
-
-        #endregion
+        private int currentOffer;
 
         #region Properties
 
@@ -26,12 +24,11 @@ namespace DealOrNoDeal.Model
         /// </value>
         public int CurrentOffer
         {
-            get
+            get => this.currentOffer;
+            private set
             {
-                var offer = this.calculateOffer(this.gameManager.GetListOfDollarAmountsLeftInPlay(), this.gameManager.getNumberOfCasesToOpenNextRound());
-                this.updateOfferStatistics(offer);
-
-                return offer;
+                this.currentOffer = value;
+                this.updateOfferStatistics(value);
             }
         }
 
@@ -58,12 +55,9 @@ namespace DealOrNoDeal.Model
         /// <summary>
         ///     Initializes a new instance of the <see cref="Banker" /> class.
         /// </summary>
-        public Banker(GameManager manager)
+        public Banker()
         {
-            manager = manager ?? throw new ArgumentNullException(nameof(manager), ExceptionMessage.NullManagerNotAllowed);
-
-            this.gameManager = manager;
-
+            this.CurrentOffer = InitialCurrentOffer;
             this.MinOffer = InitialMinOffer;
             this.MaxOffer = InitialMaxOffer;
         }
@@ -79,11 +73,13 @@ namespace DealOrNoDeal.Model
         ///     The offer is then rounded to the nearest dollar.
         ///     Precondition: dollarAmountsInPlay does not equal null AND dollarAmountsInPlay.Count does not equal 0 AND
         ///     casesToOpenNextRound does not equal 0.
+        ///     Post-condition: CurrentOffer = the banker's new offer. If CurrentOffer greater than MaxOffer, then MaxOffer = CurrentOffer.
+        ///     If CurrentOffer less than MinOffer, then MinOffer = CurrentOffer
         /// </summary>
         /// <param name="dollarAmountsInPlay">A list of all the remaining dollar amounts still contained in briefcases in play.</param>
         /// <param name="casesToOpenNextRound">The number of cases to open next round.</param>
-        /// <returns>The banker's offer for the player.</returns>
-        private int calculateOffer(IList<int> dollarAmountsInPlay, int casesToOpenNextRound)
+        /// <returns>The banker's current offer for the player.</returns>
+        public int CalculateOffer(IList<int> dollarAmountsInPlay, int casesToOpenNextRound)
         {
             if (dollarAmountsInPlay == null)
             {
@@ -106,19 +102,14 @@ namespace DealOrNoDeal.Model
             var unRoundedOffer = totalDollarAmountRemaining / (decimal) casesToOpenNextRound / numberOfCasesRemaining;
 
             var roundedOffer = (int) Math.Round(unRoundedOffer, MidpointRounding.AwayFromZero);
+            this.CurrentOffer = roundedOffer;
 
-            return roundedOffer;
+            return this.CurrentOffer;
         }
 
         private int sumDollarAmounts(IEnumerable<int> dollarAmounts)
         {
-            var sumOfAmounts = 0;
-            foreach (var amount in dollarAmounts)
-            {
-                sumOfAmounts += amount;
-            }
-
-            return sumOfAmounts;
+            return dollarAmounts.Sum();
         }
 
         private void updateOfferStatistics(int newOffer)
@@ -140,6 +131,7 @@ namespace DealOrNoDeal.Model
 
         private const int InitialMinOffer = int.MaxValue;
         private const int InitialMaxOffer = int.MinValue;
+        private const int InitialCurrentOffer = 0;
 
         #endregion
     }

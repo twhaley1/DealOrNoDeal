@@ -42,6 +42,22 @@ namespace DealOrNoDeal.Model
         /// </value>
         public bool IsFirstRound => this.CurrentRound == InitialCurrentRound;
 
+        /// <summary>
+        ///     Gets a value indicating whether the current instance of the game is at the end of a round.
+        /// </summary>
+        /// <value>
+        ///     <c>true</c> if this instance is at the end of a round; otherwise, <c>false</c>.
+        /// </value>
+        public bool NoRemainingCasesLeft => this.CasesLeftInCurrentRound == 0;
+
+        /// <summary>
+        ///     Gets the number of cases left to open in the current round.
+        /// </summary>
+        /// <value>
+        ///     The cases left to open in the current round.
+        /// </value>
+        public int CasesLeftInCurrentRound { get; set; }
+
         private int CurrentCasesPerRoundIndex { get; set; }
 
         #endregion
@@ -55,6 +71,7 @@ namespace DealOrNoDeal.Model
         {
             this.CurrentRound = InitialCurrentRound;
             this.CurrentCasesPerRoundIndex = InitialCurrentCasesPerRoundIndex;
+            this.CasesLeftInCurrentRound = InitialCasesLeft;
         }
 
         #endregion
@@ -64,24 +81,29 @@ namespace DealOrNoDeal.Model
         /// <summary>
         ///     Moves to next round by incrementing Round property and setting
         ///     initial number of cases for that round
-        ///     Post-condition: Round == Round@prev + 1
+        ///     Post-condition: Round == Round@prev + 1 and CasesLeftInCurrentRound is updated
         /// </summary>
         public void MoveToNextRound()
         {
             this.CurrentRound++;
             this.CurrentCasesPerRoundIndex++;
+            this.CasesLeftInCurrentRound = this.GetNumberOfCasesToOpenThisRound();
         }
 
         /// <summary>
         ///     Gets the number of cases to open this round.
         /// </summary>
-        /// <returns>number of cases to be opened at the start of the current round.</returns>
+        /// <returns>Number of cases to be opened at the start of the current round.</returns>
         public int GetNumberOfCasesToOpenThisRound()
         {
             return this.casesPerRound[this.CurrentCasesPerRoundIndex];
         }
 
-        public int getNumberOfCasesToOpenNextRound()
+        /// <summary>
+        ///     Gets the number of cases to open next round.
+        /// </summary>
+        /// <returns>Number of cases to be opened at the start of the next round.</returns>
+        public int GetNumberOfCasesToOpenNextRound()
         {
             return this.casesPerRound[this.CurrentCasesPerRoundIndex + 1];
         }
@@ -94,6 +116,7 @@ namespace DealOrNoDeal.Model
         private const int InitialCurrentCasesPerRoundIndex = 0;
         private const int FinalRound = 10;
         private const int SemiFinalRound = FinalRound - 1;
+        private const int InitialCasesLeft = 6;
 
         #endregion
     }
