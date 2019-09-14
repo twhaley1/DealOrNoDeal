@@ -1,23 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using System.Data;
 using Windows.UI.Xaml.Controls;
 using DealOrNoDeal.Error;
 
 namespace DealOrNoDeal.Model
 {
+
+    /// <summary>
+    ///     Used as a selector for the type of game that the player could play.
+    /// </summary>
     public enum GameMode
     {
+
+        /// <summary>
+        ///     The regular game mode.
+        /// </summary>
         Regular,
+
+        /// <summary>
+        ///     The syndicated game mode.
+        /// </summary>
         Syndicated,
+
+        /// <summary>
+        ///     The mega game mode.
+        /// </summary>
         Mega
     }
 
+    /// <summary>
+    ///     Used as a selector for the game length that the player could choose.
+    /// </summary>
     public enum GameLength
     {
+
+        /// <summary>
+        ///     The default game length. 
+        /// </summary>
         Default,
+
+        /// <summary>
+        ///     The shorter game length.
+        /// </summary>
         Short,
+
+        /// <summary>
+        ///     The longer game length.
+        /// </summary>
         Long
     }
 
@@ -48,7 +77,7 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the game is started - Player has selected a case.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if this game is started; otherwise, <c>false</c>.
+        ///     <c>true</c> If this game is started; otherwise, <c>false</c>.
         /// </value>
         public bool IsGameStarted { get; private set; }
 
@@ -56,7 +85,7 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether this game is over.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if the game is over; otherwise, <c>false</c>.
+        ///     <c>true</c> If the game is over; otherwise, <c>false</c>.
         /// </value>
         public bool IsGameOver { get; private set; }
 
@@ -64,23 +93,31 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the current instance of the game is at the end of a round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if this instance is at the end of a round; otherwise, <c>false</c>.
+        ///     <c>true</c> If this instance is at the end of a round; otherwise, <c>false</c>.
         /// </value>
-        public bool GetNoRemainingCasesLeft => this.roundManager.NoRemainingCasesLeft;
+        public bool GetNoRemainingCasesLeft => this.roundManager.NoCasesLeftToSelect;
 
         /// <summary>
         ///     Gets a value indicating whether the current round is the final round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if it is the final round; otherwise, <c>false</c>.
+        ///     <c>true</c> If it is the final round; otherwise, <c>false</c>.
         /// </value>
         public bool GetIsFinalRound => this.roundManager.IsFinalRound;
+
+        /// <summary>
+        ///     Gets a value indicating whether it is the start of the final round.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> If it is the start of the final round; otherwise, <c>false</c>.
+        /// </value>
+        public bool GetIsStartOfFinalRound => this.GetIsFinalRound && !this.IsGameOver;
 
         /// <summary>
         ///     Gets a value indicating whether the current round is the semi final round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if it is the semi final round; otherwise, <c>false</c>.
+        ///     <c>true</c> If it is the semi final round; otherwise, <c>false</c>.
         /// </value>
         public bool GetIsSemiFinalRound => this.roundManager.IsSemiFinalRound;
 
@@ -88,7 +125,7 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the current round is the first round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if it is the first round; otherwise, <c>false</c>.
+        ///     <c>true</c> If it is the first round; otherwise, <c>false</c>.
         /// </value>
         public bool GetIsFirstRound => this.roundManager.IsFirstRound;
 
@@ -101,18 +138,18 @@ namespace DealOrNoDeal.Model
         public int GetCurrentRound => this.roundManager.CurrentRound;
 
         /// <summary>
-        ///     Gets the get number of cases to open in current round.
+        ///     Gets the number of cases to open at the start of the current round.
         /// </summary>
         /// <value>
-        ///     The get number cases to open in current round.
+        ///     The number cases to open at the start of the current round.
         /// </value>
         public int GetNumberCasesToOpenInCurrentRound => this.roundManager.GetNumberOfCasesToOpenThisRound();
 
         /// <summary>
-        ///     Gets the number of cases left in current round.
+        ///     Gets the number of cases left to select in the current round.
         /// </summary>
         /// <value>
-        ///     The number of cases left in current round.
+        ///     The number of cases left to select in the  current round.
         /// </value>
         public int GetNumberCasesLeftInCurrentRound => this.roundManager.CasesLeftInCurrentRound;
 
@@ -188,11 +225,11 @@ namespace DealOrNoDeal.Model
         #region Methods
 
         /// <summary>
-        ///     Determines whether id is valid.
+        ///     Determines whether a specified id is valid.
         /// </summary>
         /// <param name="id">A briefcase identifier. This corresponds to a Briefcase's id attribute.</param>
         /// <returns>
-        ///     <c>true</c> if id is greater than or equal to 0 and less than or equal to 25; otherwise, <c>false</c>.
+        ///     <c>true</c> If id is greater than or equal to 0 and less than or equal to 25; otherwise, <c>false</c>.
         /// </returns>
         public static bool IsValidBriefcaseId(int id)
         {
@@ -200,11 +237,11 @@ namespace DealOrNoDeal.Model
         }
 
         /// <summary>
-        ///     Determines whether or not the dollar amount is valid.
+        ///     Determines whether or not the specified dollar amount is valid.
         /// </summary>
         /// <param name="dollarAmount">A briefcase's dollar amount. This corresponds to a Briefcase's dollar amount attribute.</param>
         /// <returns>
-        ///     <c>true</c> if dollarAmount is greater than or equal to zero; otherwise, <c>false</c>.
+        ///     <c>true</c> If dollarAmount is greater than or equal to zero; otherwise, <c>false</c>.
         /// </returns>
         public static bool IsValidBriefcaseDollarAmount(int dollarAmount)
         {
@@ -213,8 +250,9 @@ namespace DealOrNoDeal.Model
 
 
         /// <summary>
-        ///     Sets the current game mode depending on the value of a content dialog result.
-        ///     The briefcases are then repopulated to align with new dollar values.
+        ///     Sets the current game mode depending on the value of a GameModeDialog result.
+        ///     Since the briefcase dollar amounts are dependent on the GameMode, the briefcases are then
+        ///     repopulated to align with the new dollar values that the GameMode is associated with.
         ///     Post-condition: This game mode is set after the user selects a button of a GameModeDialog.
         ///     Therefore, if the user selects Mega, then CurrentGameMode = GameMode.Mega, if the user
         ///     selects Syndicated, then CurrentGameMode = GameMode.Syndicated. If the user selects Regular,
@@ -239,6 +277,11 @@ namespace DealOrNoDeal.Model
             this.caseManager.PopulateBriefCases(this.GetAllDollarAmounts());
         }
 
+        /// <summary>
+        ///     Sets the number of rounds in the game. The result parameter should
+        ///     come from a RoundSelectionDialog.
+        /// </summary>
+        /// <param name="result">The result of the RoundSelectionDialog.</param>
         public void SetNumberOfRounds(ContentDialogResult result)
         {
             if (result == ContentDialogResult.Primary)
@@ -258,7 +301,7 @@ namespace DealOrNoDeal.Model
         /// <summary>
         ///     Gets all dollar amounts depending on the current game mode.
         /// </summary>
-        /// <returns>game mode dependent enumerable of dollar amounts</returns>
+        /// <returns>Game mode dependent enumerable of dollar amounts</returns>
         public IList<int> GetAllDollarAmounts()
         {
             return this.caseManager.GetNewListOfPossibleDollarAmounts(this.CurrentGameMode);
@@ -292,12 +335,13 @@ namespace DealOrNoDeal.Model
                 this.IsGameStarted = true;
             }
 
-            if (this.roundManager.NoRemainingCasesLeft)
+            var dollarAmountInCase = this.caseManager.RemoveBriefcaseFromPlay(briefcase);
+            if (this.roundManager.NoCasesLeftToSelect)
             {
                 this.banker.AddFormalOffer(this.calculateOffer());
             }
 
-            return this.caseManager.RemoveBriefcaseFromPlay(briefcase);
+            return dollarAmountInCase;
         }
 
         /// <summary>

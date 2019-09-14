@@ -274,7 +274,7 @@
 
                 <Grid Grid.Row="6" MinWidth="150" MinHeight="150" Background="White">
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock x:Name="summaryOutput" TextWrapping="Wrap" Height="Auto" Width="Auto" FontSize="14" Foreground="Black"/>
+                        <TextBlock x:Name="summaryOutput" TextWrapping="Wrap" Height="Auto" Width="Auto" FontSize="14" Foreground="Black" FontFamily="Courier New"/>
                     </StackPanel>
                 </Grid>
 

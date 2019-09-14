@@ -28,14 +28,11 @@ namespace DealOrNoDeal.Model
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Briefcase"/> class.
-        ///
-        ///     Precondition: id greater than or equal to 0 AND id less than or equal to 25 AND dollarAmount greater than or equal to 0.
-        ///     Post-condition: new Briefcase(id, dollarAmount).Id == id AND new Briefcase(id, dollarAmount).DollarAmount == dollarAmount.
+        ///     Precondition: id greater than or equal to 0. id less than or equal to 25. dollarAmount greater than or equal to 0.
+        ///     Post-condition: Id = id. DollarAmount = dollarAmount
         /// </summary>
-        ///
         /// <param name="id">The briefcase's unique identifier.</param>
         /// <param name="dollarAmount">The dollar amount that is stored within the briefcase.</param>
-        ///
         /// <exception cref="ArgumentOutOfRangeException">
         ///     id or dollarAmount - exception thrown by violated precondition.
         /// </exception>

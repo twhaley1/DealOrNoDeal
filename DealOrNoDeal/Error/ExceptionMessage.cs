@@ -48,5 +48,15 @@
         /// </summary>
         public const string NullStringsNotAllowed = "A null string is not accepted.";
 
+        /// <summary>
+        ///     Message for when a method has a null list passed in to it.
+        /// </summary>
+        public const string NullListNotAllowed = "A null list is not accepted.";
+
+        /// <summary>
+        ///     Message for when a method has a null Briefcase passed in to it.
+        /// </summary>
+        public const string NullBriefcaseNotAllowed = "A null briefcase is not accepted.";
+
     }
 }

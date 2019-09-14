@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+﻿using Windows.UI.Xaml.Controls;
 
 // The Content Dialog item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace DealOrNoDeal.View
 {
-    public sealed partial class GameModeDialog : ContentDialog
+
+    /// <summary>
+    ///     A custom ContentDialog that is used to let the user select their desired game mode.
+    /// </summary>
+    /// <seealso cref="Windows.UI.Xaml.Controls.ContentDialog" />
+    /// <seealso cref="Windows.UI.Xaml.Markup.IComponentConnector" />
+    /// <seealso cref="Windows.UI.Xaml.Markup.IComponentConnector2" />
+    public sealed partial class GameModeDialog
     {
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="GameModeDialog"/> class.
+        /// </summary>
         public GameModeDialog()
         {
             this.InitializeComponent();

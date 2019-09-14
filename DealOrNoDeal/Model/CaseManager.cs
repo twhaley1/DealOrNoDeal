@@ -58,10 +58,10 @@ namespace DealOrNoDeal.Model
 
         /// <summary>
         ///     Gets the last briefcase to be opened by the player. This is the briefcase in which the player
-        ///     will choose their starting briefcase or this briefcase.
+        ///     will either choose their starting briefcase or this briefcase.
         ///     Precondition: there must only be one briefcase left in play.
         /// </summary>
-        /// <returns>the last briefcase in play.</returns>
+        /// <returns>The last briefcase in play.</returns>
         /// <exception cref="ConstraintException">Occurs when there is more than one briefcase still in play.</exception>
         public Briefcase GetLastBriefcase()
         {
@@ -74,7 +74,7 @@ namespace DealOrNoDeal.Model
         }
 
         /// <summary>
-        ///     Gets the case with chosen identifier.
+        ///     Gets the case with the specified identifier.
         ///     Precondition: The chosen id must belong to a briefcase that is still in play.
         /// </summary>
         /// <param name="id">The identifier.</param>
@@ -108,6 +108,8 @@ namespace DealOrNoDeal.Model
         /// <returns>The dollar amount in the removed briefcase.</returns>
         public int RemoveBriefcaseFromPlay(Briefcase briefcase)
         {
+            briefcase = briefcase ?? throw new ArgumentNullException(ExceptionMessage.NullBriefcaseNotAllowed);
+
             var targetBriefcaseAmount = briefcase.DollarAmount;
             this.briefcases.Remove(briefcase);
 
@@ -119,7 +121,7 @@ namespace DealOrNoDeal.Model
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>
-        ///   <c>true</c> if a briefcase with the specified id is in play; otherwise, <c>false</c>.
+        ///   <c>true</c> If a briefcase with the specified id is in play; otherwise, <c>false</c>.
         /// </returns>
         public bool IsIdStillInPlay(int id)
         {
@@ -128,20 +130,30 @@ namespace DealOrNoDeal.Model
 
         /// <summary>
         ///     Allocates the starting briefcase and its id.
-        ///     Post-condition: StartingCase = targetBriefcase and StartingCaseId = targetBriefcase.Id
+        ///     Precondition: targetBriefcase not equal to null.
+        ///     Post-condition: StartingCase = targetBriefcase. StartingCaseId = targetBriefcase.Id
         /// </summary>
         /// <param name="targetBriefcase">The target briefcase.</param>
         public void AllocateStartingBriefcase(Briefcase targetBriefcase)
         {
+            targetBriefcase = targetBriefcase ??
+                              throw new ArgumentNullException(ExceptionMessage.NullBriefcaseNotAllowed);
+
             this.StartingCase = targetBriefcase;
             this.StartingCaseId = targetBriefcase.Id;
         }
 
+
         /// <summary>
-        ///     Populates the game's briefcases with briefcase objects with unique identifiers and dollar amounts.
+        ///     Populates the brief cases with the values specified in dollarAmounts.
+        ///     Precondition: dollarAmounts not equal to null.
+        ///     Post-condition: IsIdStillInPlay(0...TotalNumberOfCases - 1) = true.
         /// </summary>
+        /// <param name="dollarAmounts">The dollar amounts that will fill the briefcases.</param>
         public void PopulateBriefCases(IEnumerable<int> dollarAmounts)
         {
+            dollarAmounts = dollarAmounts ?? throw new ArgumentNullException(ExceptionMessage.NullListNotAllowed);
+
             this.briefcases.Clear();
             var possibleDollarAmounts = new List<int>(dollarAmounts);
             for (var i = 0; i < TotalNumberOfCases; i++)
@@ -155,7 +167,7 @@ namespace DealOrNoDeal.Model
         ///     The default is GameMode.Regular
         /// </summary>
         /// <param name="mode">The game mode.</param>
-        /// <returns></returns>
+        /// <returns>List of possible dollar amounts depending on the game mode.</returns>
         public IList<int> GetNewListOfPossibleDollarAmounts(GameMode mode)
         {
             switch (mode)
@@ -196,7 +208,8 @@ namespace DealOrNoDeal.Model
         }
 
         /// <summary>
-        ///     Puts the starting case in play.
+        /// Puts the starting case in play.
+        /// Post-condition: IsIdStillInPlay(StartingCaseId) = true
         /// </summary>
         public void PutStartingCaseInPlay()
         {

@@ -42,6 +42,30 @@ namespace DealOrNoDeal.Util
             return endsWithS ? numberStringPhrase : numberStringPhrase + "s";
         }
 
+
+        /// <summary>
+        ///     When the two parameters are on separate lines, aligns the target string with
+        ///     the first character after the alignmentDeclaration.
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="alignmentDeclaration">The alignment declaration.</param>
+        /// <returns></returns>
+        public static String alignTargetAfter(string target, string alignmentDeclaration)
+        {
+            target = target ?? throw new ArgumentNullException(nameof(target), ExceptionMessage.NullStringsNotAllowed);
+            alignmentDeclaration = alignmentDeclaration ??
+                                   throw new ArgumentNullException(nameof(alignmentDeclaration),
+                                       ExceptionMessage.NullStringsNotAllowed);
+
+            var spaces = "";
+            for (var i = 0; i < alignmentDeclaration.Length; i++)
+            {
+                spaces += " ";
+            }
+
+            return spaces + target;
+        }
+
         #endregion
     }
 }

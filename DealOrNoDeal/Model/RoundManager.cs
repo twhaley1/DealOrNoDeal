@@ -1,21 +1,29 @@
-﻿
-using System.Runtime.CompilerServices;
-
-namespace DealOrNoDeal.Model
+﻿namespace DealOrNoDeal.Model
 {
     /// <summary>
     ///     Manages round information and provides functionality to maneuver to the next round.
     /// </summary>
     public class RoundManager
     {
+        #region Data members
+
         private readonly int[] defaultTenRoundCasesPerRound = { 6, 5, 4, 3, 2, 1, 1, 1, 1, 1 };
         private readonly int[] shorterSevenRoundCasesPerRound = { 8, 6, 4, 3, 2, 1, 1 };
         private readonly int[] longerThirteenRoundCasesPerRound = { 7, 5, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
         private GameLength currentGameLength;
         private int[] currentCasesPerRound;
 
+        #endregion
+
         #region Properties
 
+        /// <summary>
+        ///     Gets or sets the length of the current game.
+        /// </summary>
+        /// <value>
+        ///     The length of the current game.
+        /// </value>
         public GameLength CurrentGameLength
         {
             get => this.currentGameLength;
@@ -52,7 +60,7 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the game is at the final round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if the game is at the final round; otherwise, <c>false</c>.
+        ///     <c>true</c> If the game is at the final round; otherwise, <c>false</c>.
         /// </value>
         public bool IsFinalRound => this.CurrentRound == this.FinalRound;
 
@@ -60,7 +68,7 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the current instance of the game is at the semi final round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if the game is at the semi final round; otherwise, <c>false</c>.
+        ///     <c>true</c> If the game is at the semi final round; otherwise, <c>false</c>.
         /// </value>
         public bool IsSemiFinalRound => this.CurrentRound == this.SemiFinalRound;
 
@@ -68,7 +76,7 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the current instance of the game is at the first round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if the game is at the first round; otherwise, <c>false</c>.
+        ///     <c>true</c> If the game is at the first round; otherwise, <c>false</c>.
         /// </value>
         public bool IsFirstRound => this.CurrentRound == InitialCurrentRound;
 
@@ -76,9 +84,9 @@ namespace DealOrNoDeal.Model
         ///     Gets a value indicating whether the current instance of the game is at the end of a round.
         /// </summary>
         /// <value>
-        ///     <c>true</c> if this instance is at the end of a round; otherwise, <c>false</c>.
+        ///     <c>true</c> If this instance is at the end of a round; otherwise, <c>false</c>.
         /// </value>
-        public bool NoRemainingCasesLeft => this.CasesLeftInCurrentRound == 0;
+        public bool NoCasesLeftToSelect => this.CasesLeftInCurrentRound == 0;
 
         /// <summary>
         ///     Gets the number of cases left to open in the current round.
@@ -125,9 +133,9 @@ namespace DealOrNoDeal.Model
         #region Methods
 
         /// <summary>
-        ///     Moves to next round by incrementing Round property and setting
+        ///     Moves to next round by incrementing CurrentRound property and setting
         ///     initial number of cases for that round
-        ///     Post-condition: Round == Round@prev + 1 and CasesLeftInCurrentRound is updated
+        ///     Post-condition: CurrentRound = CurrentRound + 1 and CasesLeftInCurrentRound is updated
         /// </summary>
         public void MoveToNextRound()
         {
@@ -137,7 +145,7 @@ namespace DealOrNoDeal.Model
         }
 
         /// <summary>
-        ///     Gets the number of cases to open this round.
+        ///     Gets the number of cases to open at the start of this round.
         /// </summary>
         /// <returns>Number of cases to be opened at the start of the current round.</returns>
         public int GetNumberOfCasesToOpenThisRound()

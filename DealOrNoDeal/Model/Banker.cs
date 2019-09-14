@@ -11,8 +11,17 @@ namespace DealOrNoDeal.Model
     /// </summary>
     public class Banker
     {
+        #region Data members
+
+        #region Constants
+
+        private const int RoundingFactor = 100;
+
+        #endregion
 
         private readonly IList<int> offers;
+
+        #endregion
 
         #region Properties
 
@@ -41,12 +50,13 @@ namespace DealOrNoDeal.Model
         public int MaxOffer => this.offers.Max();
 
         /// <summary>
-        ///     Gets the average offer.
+        ///     Gets the average offer rounded to the nearest 100.
         /// </summary>
         /// <value>
         ///     The average offer.
         /// </value>
-        public int AvgOffer => (int) Math.Round(this.offers.Average() / RoundingFactor, 0, MidpointRounding.AwayFromZero) * RoundingFactor;
+        public int AvgOffer =>
+            (int) Math.Round(this.offers.Average() / RoundingFactor, 0, MidpointRounding.AwayFromZero) * RoundingFactor;
 
         #endregion
 
@@ -71,11 +81,10 @@ namespace DealOrNoDeal.Model
         ///     The offer is then rounded to the nearest hundred.
         ///     Precondition: dollarAmountsInPlay does not equal null AND dollarAmountsInPlay.Count does not equal 0 AND
         ///     casesToOpenNextRound does not equal 0.
-        ///     Post-condition: CurrentOffer = the banker's new offer. 
         /// </summary>
         /// <param name="dollarAmountsInPlay">A list of all the remaining dollar amounts still contained in briefcases in play.</param>
         /// <param name="casesToOpenNextRound">The number of cases to open next round.</param>
-        /// <returns>The banker's current offer for the player.</returns>
+        /// <returns>The banker's offer for the player.</returns>
         public int CalculateOffer(IList<int> dollarAmountsInPlay, int casesToOpenNextRound)
         {
             if (dollarAmountsInPlay == null)
@@ -98,14 +107,16 @@ namespace DealOrNoDeal.Model
             var totalDollarAmountRemaining = this.sumDollarAmounts(dollarAmountsInPlay);
             var unRoundedOffer = totalDollarAmountRemaining / (decimal) casesToOpenNextRound / numberOfCasesRemaining;
 
-            var roundedOffer = (int) Math.Round(unRoundedOffer / RoundingFactor, 0, MidpointRounding.AwayFromZero) * RoundingFactor;
+            var roundedOffer = (int) Math.Round(unRoundedOffer / RoundingFactor, 0, MidpointRounding.AwayFromZero) *
+                               RoundingFactor;
 
             return roundedOffer;
         }
 
-
         /// <summary>
         ///     Adds the formal offer to the list of offers.
+        ///     Post-condition: CurrentOffer = offer. If offer less than MinOffer, MinOffer = offer.
+        ///     If offer greater than MaxOffer, MaxOffer = offer.
         /// </summary>
         /// <param name="offer">The offer.</param>
         public void AddFormalOffer(int offer)
@@ -117,12 +128,6 @@ namespace DealOrNoDeal.Model
         {
             return dollarAmounts.Sum();
         }
-
-        #endregion
-
-        #region Constants
-
-        private const int RoundingFactor = 100;
 
         #endregion
     }
