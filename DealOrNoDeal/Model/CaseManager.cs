@@ -156,7 +156,7 @@ namespace DealOrNoDeal.Model
         /// </summary>
         /// <param name="mode">The game mode.</param>
         /// <returns></returns>
-        public IList<int> getNewListOfPossibleDollarAmounts(GameMode mode)
+        public IList<int> GetNewListOfPossibleDollarAmounts(GameMode mode)
         {
             switch (mode)
             {

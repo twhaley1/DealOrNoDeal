@@ -11,7 +11,7 @@ namespace DealOrNoDeal.Model
     ///     Holds constants that are used to replace magic numbers in the code. Any hard-coded string
     ///     that is more than a word or two should be placed here.
     /// </summary>
-    public class StringConstants
+    public abstract class StringConstants
     {
         public const string RegularGameModeWelcome = "Welcome to Deal or No Deal!";
 
@@ -22,5 +22,6 @@ namespace DealOrNoDeal.Model
         public const string SetUpTheGame = "Please configure your game.";
 
         public const string SelectYourCase = "Please select your case.";
+
     }
 }

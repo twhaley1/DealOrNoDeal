@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -63,17 +64,28 @@ namespace DealOrNoDeal.View
 
         private async void ConfigureGameButton_OnClick(object sender, RoutedEventArgs e)
         {
-            var gameModeSelector = new GameModeDialog();
-            var result = await gameModeSelector.ShowAsync();
-
-            this.adjustGreetingBasedOnGameMode(result);
-            this.gameManager.SetGameMode(result);
-            this.changeDollarLabels(this.gameManager.GetAllDollarAmounts());
-            
-            //TODO: Add functionality to specify number of rounds.
+            await this.selectGameMode();
+            await this.selectNumberOfRounds();
 
             this.disableSetUpButton();
             this.enableAllVisibleButtons();
+        }
+
+        private async Task selectGameMode()
+        {
+            var gameModeSelector = new GameModeDialog();
+            var gameModeResult = await gameModeSelector.ShowAsync();
+
+            this.adjustGreetingBasedOnGameMode(gameModeResult);
+            this.gameManager.SetGameMode(gameModeResult);
+            this.changeDollarLabels(this.gameManager.GetAllDollarAmounts());
+        }
+
+        private async Task selectNumberOfRounds()
+        {
+            var roundSelector = new RoundSelectionDialog();
+            var roundResult = await roundSelector.ShowAsync();
+            this.gameManager.SetNumberOfRounds(roundResult);
         }
 
         private void adjustGreetingBasedOnGameMode(ContentDialogResult result)
@@ -229,7 +241,42 @@ namespace DealOrNoDeal.View
                                       "GAME OVER";
             this.disableAllBriefcaseButtons();
             this.collapseAllBriefcaseButtons();
+
             this.gameManager.EndGame();
+            this.waitSecondForReplayDialog();
+        }
+
+        private async void waitSecondForReplayDialog()
+        {
+            var oneSecond = 1000;
+            await Task.Delay(oneSecond);
+
+            this.initPlayAgainDialog();
+        }
+
+        private async void initPlayAgainDialog()
+        {
+            var replayDialog = new PlayAgainDialog();
+            var choice = await replayDialog.ShowAsync();
+
+            if (choice == ContentDialogResult.Primary)
+            {
+                restartGame();
+            }
+            else
+            {
+                exitGame();
+            }
+        }
+
+        private static async void restartGame()
+        {
+            await CoreApplication.RequestRestartAsync(string.Empty);
+        }
+
+        private static void exitGame()
+        {
+            Application.Current.Exit();
         }
 
         private int getBriefcaseID(Button selectedBriefCase)
@@ -354,6 +401,8 @@ namespace DealOrNoDeal.View
 
             this.disableDealButtons();
             this.collapseAllBriefcaseButtons();
+
+            this.waitSecondForReplayDialog();
         }
 
         private void updateDealSummaryOutput()

@@ -14,6 +14,13 @@ namespace DealOrNoDeal.Model
         Mega
     }
 
+    public enum GameLength
+    {
+        Default,
+        Short,
+        Long
+    }
+
     /// <summary>
     ///     Handles the management of the actual game play.
     /// </summary>
@@ -207,6 +214,7 @@ namespace DealOrNoDeal.Model
 
         /// <summary>
         ///     Sets the current game mode depending on the value of a content dialog result.
+        ///     The briefcases are then repopulated to align with new dollar values.
         ///     Post-condition: This game mode is set after the user selects a button of a GameModeDialog.
         ///     Therefore, if the user selects Mega, then CurrentGameMode = GameMode.Mega, if the user
         ///     selects Syndicated, then CurrentGameMode = GameMode.Syndicated. If the user selects Regular,
@@ -231,13 +239,29 @@ namespace DealOrNoDeal.Model
             this.caseManager.PopulateBriefCases(this.GetAllDollarAmounts());
         }
 
+        public void SetNumberOfRounds(ContentDialogResult result)
+        {
+            if (result == ContentDialogResult.Primary)
+            {
+                this.roundManager.CurrentGameLength = GameLength.Short;
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                this.roundManager.CurrentGameLength = GameLength.Long;
+            }
+            else
+            {
+                this.roundManager.CurrentGameLength = GameLength.Default;
+            }
+        }
+
         /// <summary>
         ///     Gets all dollar amounts depending on the current game mode.
         /// </summary>
         /// <returns>game mode dependent enumerable of dollar amounts</returns>
         public IList<int> GetAllDollarAmounts()
         {
-            return this.caseManager.getNewListOfPossibleDollarAmounts(this.CurrentGameMode);
+            return this.caseManager.GetNewListOfPossibleDollarAmounts(this.CurrentGameMode);
         }
 
         /// <summary>
