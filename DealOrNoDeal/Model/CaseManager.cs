@@ -140,13 +140,48 @@ namespace DealOrNoDeal.Model
         /// <summary>
         ///     Populates the game's briefcases with briefcase objects with unique identifiers and dollar amounts.
         /// </summary>
-        public void PopulateBriefCases()
+        public void PopulateBriefCases(IEnumerable<int> dollarAmounts)
         {
-            var possibleDollarAmounts = new List<int>(getNewListOfPossibleDollarAmounts());
+            this.briefcases.Clear();
+            var possibleDollarAmounts = new List<int>(dollarAmounts);
             for (var i = 0; i < TotalNumberOfCases; i++)
             {
                 this.briefcases.Add(new Briefcase(i, this.getUniqueRandomDollarAmountFrom(possibleDollarAmounts)));
             }
+        }
+
+        /// <summary>
+        ///     Gets the new list of possible dollar amounts depending on the game mode.
+        ///     The default is GameMode.Regular
+        /// </summary>
+        /// <param name="mode">The game mode.</param>
+        /// <returns></returns>
+        public IList<int> getNewListOfPossibleDollarAmounts(GameMode mode)
+        {
+            switch (mode)
+            {
+                case GameMode.Regular:
+                    return new List<int> {
+                        0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750, 1000, 5000, 10000, 25000, 50000, 75000, 100000,
+                        200000, 300000, 400000, 500000, 750000, 1000000
+                    };
+                case GameMode.Mega:
+                    return new List<int> {
+                        0, 100, 500, 1000, 2500, 5000, 7500, 10000, 20000, 30000, 40000, 50000, 75000, 100000,
+                        225000, 400000, 500000, 750000, 1000000, 2000000, 3000000, 4000000, 5000000, 6000000, 8500000, 10000000
+                    };
+                case GameMode.Syndicated:
+                    return new List<int> {
+                        0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750, 1000, 2500, 5000, 10000, 25000, 50000, 75000,
+                        100000, 150000, 200000, 250000, 350000, 500000
+                    };
+                default:
+                    return new List<int> {
+                        0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750, 1000, 5000, 10000, 25000, 50000, 75000, 100000,
+                        200000, 300000, 400000, 500000, 750000, 1000000
+                    };
+            }
+
         }
 
         /// <summary>
@@ -160,6 +195,9 @@ namespace DealOrNoDeal.Model
             return dollarAmounts;
         }
 
+        /// <summary>
+        ///     Puts the starting case in play.
+        /// </summary>
         public void PutStartingCaseInPlay()
         {
             this.briefcases.Add(this.StartingCase);
@@ -172,14 +210,6 @@ namespace DealOrNoDeal.Model
             dollarAmounts.RemoveAt(randomIndex);
 
             return chosenDollarAmount;
-        }
-
-        private static IEnumerable<int> getNewListOfPossibleDollarAmounts()
-        {
-            return new List<int> {
-                0, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750, 1000, 5000, 10000, 25000, 50000, 75000, 100000,
-                200000, 300000, 400000, 500000, 750000, 1000000
-            };
         }
 
         #endregion

@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -24,7 +27,7 @@ namespace DealOrNoDeal.View
         /// <summary>
         ///     The application height
         /// </summary>
-        public const int ApplicationHeight = 500;
+        public const int ApplicationHeight = 650;
 
         /// <summary>
         ///     The application width
@@ -48,11 +51,60 @@ namespace DealOrNoDeal.View
             this.InitializeComponent();
             this.initializeUiDataAndControls();
             this.gameManager = new GameManager();
+
+            this.casesToOpenLabel.Text = StringConstants.SetUpTheGame;
+            this.disableDealButtons();
+            this.disableAllBriefcaseButtons();
         }
 
         #endregion
 
         #region Methods
+
+        private async void ConfigureGameButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var gameModeSelector = new GameModeDialog();
+            var result = await gameModeSelector.ShowAsync();
+
+            this.adjustGreetingBasedOnGameMode(result);
+            this.gameManager.SetGameMode(result);
+            this.changeDollarLabels(this.gameManager.GetAllDollarAmounts());
+            
+            //TODO: Add functionality to specify number of rounds.
+
+            this.disableSetUpButton();
+            this.enableAllVisibleButtons();
+        }
+
+        private void adjustGreetingBasedOnGameMode(ContentDialogResult result)
+        {
+            switch (result)
+            {
+                case ContentDialogResult.Primary:
+                    this.roundLabel.Text = StringConstants.MegaGameModeWelcome;
+                    this.casesToOpenLabel.Text = StringConstants.SelectYourCase;
+                    break;
+                case ContentDialogResult.Secondary:
+                    this.roundLabel.Text = StringConstants.SyndicateGameModeWelcome;
+                    this.casesToOpenLabel.Text = StringConstants.SelectYourCase;
+                    break;
+                case ContentDialogResult.None:
+                    this.roundLabel.Text = StringConstants.RegularGameModeWelcome;
+                    this.casesToOpenLabel.Text = StringConstants.SelectYourCase;
+                    break;
+                default:
+                    this.roundLabel.Text = string.Empty;
+                    break;
+            }
+        }
+
+        private void changeDollarLabels(IList<int> dollarAmounts)
+        {
+            foreach (var border in this.dollarAmountLabels)
+            {
+                ((TextBlock) border.Child).Text = dollarAmounts[this.dollarAmountLabels.IndexOf(border)].ToString("C").Replace(".00", string.Empty);
+            }
+        }
 
         private void initializeUiDataAndControls()
         {
@@ -383,6 +435,12 @@ namespace DealOrNoDeal.View
             this.noDealButton.IsEnabled = false;
             this.dealButton.Visibility = Visibility.Collapsed;
             this.noDealButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void disableSetUpButton()
+        {
+            this.configureGameButton.IsEnabled = false;
+            this.configureGameButton.Visibility = Visibility.Collapsed;
         }
 
         private void disableAllBriefcaseButtons()

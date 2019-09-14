@@ -134,7 +134,11 @@
     <Compile Include="Model\CaseManager.cs" />
     <Compile Include="Model\GameManager.cs" />
     <Compile Include="Model\RoundManager.cs" />
+    <Compile Include="Model\StringConstants.cs" />
     <Compile Include="Util\EnglishStringUtility.cs" />
+    <Compile Include="View\GameModeDialog.xaml.cs">
+      <DependentUpon>GameModeDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\DealOrNoDealPage.xaml.cs">
       <DependentUpon>DealOrNoDealPage.xaml</DependentUpon>
     </Compile>
@@ -161,6 +165,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="View\GameModeDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\DealOrNoDealPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -59,7 +59,7 @@
 
             <Grid Grid.Column="0">
 
-                <StackPanel Orientation="Vertical">
+                <StackPanel x:Name="leftLabelColumn" Orientation="Vertical">
                     <Border x:Name="label0Border" Style="{StaticResource MoneyAmountsBorderStyle}">
                         <TextBlock HorizontalAlignment="Center" Text="$0" VerticalAlignment="Center"
                                    TextAlignment="Center" FontWeight="Bold" Foreground="Black" />
@@ -116,7 +116,7 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Column="2">
-                <StackPanel Orientation="Vertical">
+                <StackPanel x:Name="rightLabelColumn" Orientation="Vertical">
 
                     <Border x:Name="label13Border" Style="{StaticResource MoneyAmountsBorderStyle}">
                         <TextBlock HorizontalAlignment="Center" Text="$1,000" VerticalAlignment="Center"
@@ -274,7 +274,7 @@
 
                 <Grid Grid.Row="6" MinWidth="150" MinHeight="150" Background="White">
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock x:Name="summaryOutput" TextWrapping="Wrap" Height="Auto" Width="Auto" FontSize="10" Foreground="Black"/>
+                        <TextBlock x:Name="summaryOutput" TextWrapping="Wrap" Height="Auto" Width="Auto" FontSize="14" Foreground="Black"/>
                     </StackPanel>
                 </Grid>
 
@@ -284,6 +284,8 @@
                                 Click="dealButton_Click" />
                         <Button x:Name="noDealButton" Content="No deal" Style="{StaticResource GamePlayStyle}"
                                 Click="noDealButton_Click" />
+                        <Button x:Name="configureGameButton" Content="Set Up" Style="{StaticResource GamePlayStyle}"
+                                Click="ConfigureGameButton_OnClick"/>
                     </StackPanel>
                 </Grid>
 
