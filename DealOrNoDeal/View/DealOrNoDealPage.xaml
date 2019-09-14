@@ -217,7 +217,7 @@
                 </Grid>
 
                 <Grid Grid.Row="2" MinWidth="280">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel x:Name="middleStackPanel" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="case11" Content="12" Style="{StaticResource GameCaseStyle}"
                                 Click="briefcase_Click" />
                         <Button x:Name="case12" Content="13" Style="{StaticResource GameCaseStyle}"

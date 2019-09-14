@@ -160,6 +160,11 @@ namespace DealOrNoDeal.Model
             return dollarAmounts;
         }
 
+        public void PutStartingCaseInPlay()
+        {
+            this.briefcases.Add(this.StartingCase);
+        }
+
         private int getUniqueRandomDollarAmountFrom(IList<int> dollarAmounts)
         {
             var randomIndex = new Random().Next(0, dollarAmounts.Count);

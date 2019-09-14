@@ -265,6 +265,11 @@ namespace DealOrNoDeal.Model
             this.IsGameOver = true;
         }
 
+        public void ReintroduceStartingCase()
+        {
+            this.caseManager.PutStartingCaseInPlay();
+        }
+
         private void decrementCasesLeftInCurrentRound()
         {
             this.roundManager.CasesLeftInCurrentRound--;

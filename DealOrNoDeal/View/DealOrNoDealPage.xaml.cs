@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -158,9 +159,25 @@ namespace DealOrNoDeal.View
                 this.findAndGrayOutGameDollarLabel(dollarAmountInClickedBriefcase);
             }
 
-            this.gameManager.ProcessBriefCaseRemoval(clickedBriefcaseId);
+            if (this.gameManager.GetIsFinalRound)
+            {
+                this.onGameEndingCaseSelection(clickedBriefcaseButton);
+            }
+            else
+            {
+                this.gameManager.ProcessBriefCaseRemoval(clickedBriefcaseId);
+                this.modifyUiComponentsBriefcaseClick(clickedBriefcaseButton);
+            }
+        }
 
-            this.modifyUiComponentsBriefcaseClick(clickedBriefcaseButton);
+        private void onGameEndingCaseSelection(Button selectedButton)
+        {
+            this.summaryOutput.Text = "Congrats you win " +
+                                      this.gameManager.GetIdsDollarAmount(this.getBriefcaseID(selectedButton)).ToString("C") + "\n" +
+                                      "GAME OVER";
+            this.disableAllBriefcaseButtons();
+            this.collapseAllBriefcaseButtons();
+            this.gameManager.EndGame();
         }
 
         private int getBriefcaseID(Button selectedBriefCase)
@@ -241,7 +258,7 @@ namespace DealOrNoDeal.View
         {
             if (this.gameManager.GetIsFinalRound)
             {
-                this.casesToOpenLabel.Text = "Select a case below.";
+                this.casesToOpenLabel.Text = "Select final case above.";
             }
             else
             {
@@ -289,19 +306,9 @@ namespace DealOrNoDeal.View
 
         private void updateDealSummaryOutput()
         {
-            if (this.gameManager.GetIsFinalRound)
-            {
-                this.summaryOutput.Text =
-                    "Congrats you win " + this.gameManager.GetStartingBriefcaseDollarAmount.ToString("C") + "\n" +
-                    "GAME OVER";
-            }
-            else
-            {
-                this.summaryOutput.Text = "Your case contained: " +
-                                          this.gameManager.GetStartingBriefcaseDollarAmount.ToString("C") + "\n" +
-                                          "Accepted offer: " + this.gameManager.GetCurrentOffer.ToString("C") + "\n" +
-                                          "GAME OVER";
-            }
+            this.summaryOutput.Text = "Your case contained: " + this.gameManager.GetStartingBriefcaseDollarAmount.ToString("C") + "\n" +
+                                      "Accepted offer: " + this.gameManager.GetCurrentOffer.ToString("C") + "\n" +
+                                      "GAME OVER";
         }
 
         private void noDealButton_Click(object sender, RoutedEventArgs e)
@@ -317,51 +324,49 @@ namespace DealOrNoDeal.View
 
             if (this.gameManager.GetIsSemiFinalRound)
             {
-                this.collapseAllBriefcaseButtons();
-                this.changeDealButtonsToFinalBriefcaseButtons();
+                this.showPlayersStartingBriefcaseButton();
+                this.moveFinalButtonsToMiddleRow();
+                this.gameManager.ReintroduceStartingCase();
             }
-            else if (this.gameManager.GetIsFinalRound)
-            {
-                this.disableDealButtons();
-            }
-            else
-            {
-                this.disableDealButtons();
-                this.enableAllVisibleButtons();
-            }
+
+            this.enableAllVisibleButtons();
+            this.disableDealButtons();
+        }
+
+        private void moveFinalButtonsToMiddleRow()
+        {
+            var startingId = this.gameManager.GetStartingBriefcaseId;
+            var startingButton = this.briefcaseButtons.Single(button => (int) button.Tag == startingId);
+            var lastCaseId = this.gameManager.GetLastBriefcasesId();
+            var lastButton = this.briefcaseButtons.Single(button => (int) button.Tag == lastCaseId);
+
+            var startingButtonParent = (Panel) startingButton.Parent;
+            startingButtonParent.Children.Remove(startingButton);
+            var lastButtonParent = (Panel) lastButton.Parent;
+            lastButtonParent.Children.Remove(lastButton);
+
+            var finalTwoButtons = new List<Button> {startingButton, lastButton}.OrderBy(button => (int) button.Tag).ToList();
+            finalTwoButtons.ForEach(button => this.middleStackPanel.Children.Add(button));
         }
 
         private void updateGameStatePostDeal()
         {
-            if (this.gameManager.GetIsFinalRound)
-            {
-                this.gameManager.EndGame();
-            }
-            else
-            {
-                this.gameManager.NextRound();
-            }
+            this.gameManager.NextRound();
         }
 
         private void updateNoDealSummaryOutput()
         {
-            if (this.gameManager.GetIsFinalRound)
-            {
-                this.summaryOutput.Text = "Congrats you win " +
-                                          this.gameManager.GetLastBriefcasesDollarAmount().ToString("C") + "\n" +
-                                          "GAME OVER";
-            }
-            else
-            {
-                this.summaryOutput.Text = this.buildMinMaxOfferString() + "\n" +
+            this.summaryOutput.Text = this.buildMinMaxOfferString() + "\n" +
                                           "Last offer: " + this.gameManager.GetCurrentOffer.ToString("C");
-            }
         }
 
-        private void changeDealButtonsToFinalBriefcaseButtons()
+        private void showPlayersStartingBriefcaseButton()
         {
-            this.dealButton.Content = "Case " + (this.gameManager.GetStartingBriefcaseId + 1);
-            this.noDealButton.Content = "Case " + (this.gameManager.GetLastBriefcasesId() + 1);
+            var startingId = this.gameManager.GetStartingBriefcaseId;
+            var startingButton = this.briefcaseButtons.Single(button => (int) button.Tag == startingId);
+
+            startingButton.IsEnabled = true;
+            startingButton.Visibility = Visibility.Visible;
         }
 
         private void enableDealButtons()
